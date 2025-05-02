@@ -1,0 +1,45 @@
+(async () => {
+    // 自动滚动到对话最顶端
+    for (let i = 0; i < 20; i++) {
+        window.scrollTo(0, 0);
+        await new Promise(resolve => setTimeout(resolve, 900));
+    }
+
+    let blocks = document.querySelectorAll('div.relative');
+    let textContent = "";
+
+    blocks.forEach((block, idx) => {
+        let role = "Unknown";
+        let content = "";
+
+        if (block.querySelector('div.flex.justify-end')) {
+            role = "User";
+            let userContent = block.querySelector('div.flex.justify-end div');
+            if (userContent) {
+                content = userContent.innerText.trim();
+            }
+        } else if (block.querySelector('.markdown') || block.querySelector('.prose')) {
+            role = "ChatGPT";
+            let assistantContent = block.querySelector('.markdown, .prose');
+            if (assistantContent) {
+                content = assistantContent.innerText.trim();
+            }
+        }
+
+        if (content) {
+            const timestamp = new Date().toLocaleString();
+            textContent += `# ${role} Message ${idx + 1}\n`;
+            textContent += `[Time]: ${timestamp}\n`;
+            textContent += `[${role}]:\n${content}\n\n====================\n\n`;
+        }
+    });
+
+    // 创建可下载的txt文件
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ChatGPT_Full_Conversation_${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+})();

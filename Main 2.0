@@ -1,0 +1,76 @@
+(async () => {
+    console.log("⏳ 正在自动滚动页面加载所有内容，请稍候...");
+
+    // 自动滚动到底部，确保加载完整
+    let lastHeight = 0;
+    let sameCount = 0;
+
+    while (sameCount < 5) { // 如果5次检测到页面高度不变，判定滚动完成
+        window.scrollTo(0, document.body.scrollHeight);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 每次滚动后等1秒
+
+        let newHeight = document.body.scrollHeight;
+        if (newHeight === lastHeight) {
+            sameCount++;
+        } else {
+            sameCount = 0;
+            lastHeight = newHeight;
+        }
+    }
+
+    console.log("✅ 页面滚动完成，开始提取对话内容...");
+
+    // 开始提取
+    let blocks = document.querySelectorAll('div.relative');
+    let textContent = "";
+
+    blocks.forEach((block, idx) => {
+        let role = "Unknown";
+        let content = "";
+
+        if (block.querySelector('.text-token-text-primary') || block.querySelector('div.items-end')) {
+            role = "User";
+            let userContent = block.querySelector('.text-token-text-primary') || block.querySelector('div.items-end');
+            if (userContent) {
+                content = userContent.innerText.trim();
+            }
+        } else if (block.querySelector('.markdown') || block.querySelector('.prose')) {
+            role = "ChatGPT";
+            let assistantContent = block.querySelector('.markdown, .prose');
+            if (assistantContent) {
+                content = assistantContent.innerText.trim();
+            }
+        }
+
+        if (content) {
+            const timestamp = new Date().toLocaleString();
+            textContent += `# ${role} Message ${idx + 1}\n`;
+            textContent += `[Time]: ${timestamp}\n`;
+            textContent += `[${role}]:\n${content}\n\n====================\n\n`;
+        }
+    });
+
+    // 尝试读取对话标题
+    let titleElement = document.querySelector('nav a.bg-token-surface-secondary, nav a.bg-gray-200');
+    let title = titleElement ? titleElement.innerText.trim() : '';
+
+    if (!title) {
+        title = prompt('⚠️ 没找到对话标题，请手动输入文件名:', 'ChatGPT_Conversation');
+        if (!title) {
+            title = `ChatGPT_Conversation_${Date.now()}`;
+        }
+    }
+
+    title = title.replace(/[\\\/:*?"<>|]/g, '');
+
+    // 下载文件
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    console.log("🎉 对话提取完成并下载成功！");
+})();

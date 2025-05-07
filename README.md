@@ -1,3 +1,30 @@
+Ver 2.0 更新说明
+更新说明
+更新内容
+新增了自动滚动到底部功能，确保完整加载所有对话内容。
+优化了用户提问（User Message）与ChatGPT回答（Assistant Message）的识别逻辑，适配新版ChatGPT网页结构。
+支持长对话提取，避免因懒加载（Lazy Load）导致只抓取部分对话的问题。
+文件命名仍支持自动读取对话标题，若无法获取则提示用户手动输入。
+增强了异常处理与兼容性，确保脚本在不同浏览器环境下稳定运行。
+更新原因
+近期ChatGPT网页前端结构更新，且引入了虚拟滚动与懒加载机制，导致传统的静态DOM抓取方法无法获取完整对话。
+尤其在长对话场景下，未加载到可视区域的内容不会出现在HTML结构中，因此必须先模拟自动滚动，等待全部内容动态加载后，才能确保完整提取。
+本次更新针对以上变动进行了修正，提升了脚本的适应性与可靠性。
+Update Notes
+What's Updated
+Added auto-scroll to bottom functionality to ensure full conversation loading.
+Improved User Message and Assistant Message recognition to adapt to the new ChatGPT webpage structure.
+Supported long conversation extraction, avoiding missing content due to lazy-loading mechanisms.
+File naming still supports auto-fetching the conversation title; if unavailable, prompts user input.
+Enhanced error handling and compatibility across different browser environments.
+Why Updated
+Recently, ChatGPT's frontend introduced virtual scrolling and lazy loading, meaning not all conversation data is present in the DOM unless manually scrolled into view.
+In long conversations, previous static scraping methods could only capture partial content.
+This update fixes the issue by automatically scrolling the page to trigger dynamic content loading, ensuring complete and accurate extraction of both user questions and ChatGPT responses.
+
+
+
+Ver1.0 
 脚本介绍
   这段脚本可以帮助用户从当前浏览器窗口中，自动提取ChatGPT对话内容，并以当前对话标题命名保存为 .txt 文件。
   主要功能包括：
